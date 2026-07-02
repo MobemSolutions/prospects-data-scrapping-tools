@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum CampaignStatus {
+  PENDING
+  SCRAPING
+  ANALYZING
+  DONE
+  ERROR
+}
+
+enum LeadStatus {
+  PENDING
+  SCRAPED
+  ANALYZING
+  DONE
+  ERROR
+}
+
+enum MatchStatus {
+  MATCHED
+  LOW_CONFIDENCE
+  UNMATCHED
+}
+
+model Campaign {
+  id             String         @id @default(cuid())
+  query          String
+  status         CampaignStatus @default(PENDING)
+  totalLeads     Int            @default(0)
+  processedLeads Int            @default(0)
+  errorMessage   String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  leads          Lead[]
+}
+
+model Lead {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  placeId      String?
+  name         String
+  address      String?
+  phone        String?
+  website      String?
+  rating       Float?
+  reviewCount  Int?
+  category     String?
+  latitude     Float?
+  longitude    Float?
+  thumbnailUrl String?
+
+  status       LeadStatus @default(PENDING)
+  errorMessage String?
+
+  opportunityScore   Float?
+  scoreBreakdownJson String?
+  priorityFlag       Boolean @default(false)
+
+  notionPageId String? // indice local rapide ; la recherche live par titre
+  // reste la source de verite pour les conflits (cf. lib/notion/client.ts)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gmbData      GmbData?
+  websiteAudit WebsiteAudit?
+  seoAudit     SeoOnPageAudit?
+  geoAudit     GeoAudit?
+  companyData  CompanyData?
+
+  @@index([campaignId])
+}
+
+model GmbData {
+  id     String @id @default(cuid())
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  hasWebsite       Boolean
+  hasPhotos        Boolean
+  photoCount       Int?
+  reviewCount      Int
+  rating           Float
+  openingHoursJson String?
+  rawJson          String
+  createdAt        DateTime @default(now())
+}
+
+model WebsiteAudit {
+  id     String @id @default(cuid())
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  url                  String
+  mobilePerformance    Int?
+  mobileAccessibility  Int?
+  mobileBestPractices  Int?
+  mobileSeo            Int?
+  desktopPerformance   Int?
+  desktopAccessibility Int?
+  desktopBestPractices Int?
+  desktopSeo           Int?
+  lcpMs                Float?
+  cls                  Float?
+  inpMs                Float?
+  rawJson              String?
+  errorMessage         String?
+  fetchedAt            DateTime @default(now())
+}
+
+model SeoOnPageAudit {
+  id     String @id @default(cuid())
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  url                   String
+  titleTag              String?
+  titleLength           Int?
+  metaDescription       String?
+  metaDescriptionLength Int?
+  h1Count               Int?
+  h2Count               Int?
+  wordCount             Int?
+  topKeywordsJson       String?
+  imageCount            Int?
+  imagesWithAlt         Int?
+  altCoveragePct        Float?
+  hasCanonical          Boolean?
+  hasStructuredData     Boolean?
+  hasRobotsTxt          Boolean?
+  hasSitemap            Boolean?
+  openPageRank          Float?
+  contentScore          Float?
+  rawJson               String?
+  errorMessage          String?
+  fetchedAt             DateTime @default(now())
+}
+
+// AI-crawler-readiness / GEO audit (visibilité IA)
+model GeoAudit {
+  id     String @id @default(cuid())
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  url String
+
+  // Per-bot robots.txt access: [{ bot: "GPTBot", allowed: true, specified: false }, ...]
+  aiBotsJson          String?
+  aiBotsAllowedCount  Int?
+  aiBotsBlockedCount  Int?
+  aiBotsTotalChecked  Int?
+
+  llmsTxtFound     Boolean?
+  llmsTxtValid     Boolean?
+  llmsFullTxtFound Boolean?
+
+  schemaTypesJson                     String?
+  hasOrganizationOrLocalBusinessSchema Boolean?
+  hasFaqOrArticleSchema                Boolean?
+  hasSameAsLinks                       Boolean?
+  sameAsCount                          Int?
+
+  rawHtmlWordCount     Int?
+  textToHtmlByteRatio  Float?
+  likelyJsShell        Boolean?
+
+  geoScore     Float?
+  rawJson      String?
+  errorMessage String?
+  fetchedAt    DateTime @default(now())
+}
+
+model CompanyData {
+  id     String @id @default(cuid())
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  siren           String?
+  siret           String?
+  legalName       String?
+  legalForm       String?
+  nafCode         String?
+  nafLabel        String?
+  creationDate    DateTime?
+  workforceRange  String?
+  matchConfidence Float?
+  matchStatus     MatchStatus @default(UNMATCHED)
+
+  pappersFetched Boolean @default(false)
+  dirigeantsJson String?
+  financialsJson String?
+
+  rawJson      String?
+  errorMessage String?
+  fetchedAt    DateTime @default(now())
+}
+
+model QuotaUsage {
+  id        String   @id @default(cuid())
+  service   String
+  periodKey String
+  count     Int      @default(0)
+  limit     Int
+  updatedAt DateTime @updatedAt
+
+  @@unique([service, periodKey])
+}
