@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Outil interne de scrapping et scoring de prospects (Google Maps -> audits site/SEO/GEO -> matching Pappers -> export Notion/CSV).
 
-## Getting Started
-
-First, run the development server:
+## Setup
 
 ```bash
+npm install          # installe les deps + genere le client Prisma (postinstall)
+cp .env.example .env.local
+# renseigner les clés dans .env.local (demander à un membre de l'équipe)
+
+npx prisma migrate deploy   # cree dev.db et applique les migrations
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Le service de scraping Google Maps (`GOSOM_API_URL`) tourne via Docker :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+docker compose up -d
+```
 
-## Learn More
+## Notion
 
-To learn more about Next.js, take a look at the following resources:
+`NOTION_DATABASE_ID` doit être l'ID de la **base** Notion (pas celui de sa data source,
+qui apparaît parfois dans l'URL et lui ressemble). Pour le vérifier : ouvrir la base
+"Prospects" en pleine page, partager avec l'intégration (menu `...` -> Connexions ->
+"MOBEM Notion connection"), puis récupérer l'ID dans l'URL `https://www.notion.so/<id>?v=...`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tests
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run test
+```
