@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { runCampaign } from "@/lib/pipeline/runCampaign";
 
@@ -22,4 +23,12 @@ export async function startCampaign(formData: FormData) {
   });
 
   redirect(`/campaigns/${campaign.id}`);
+}
+
+export async function deleteCampaigns(ids: string[]) {
+  if (ids.length === 0) return;
+
+  await prisma.campaign.deleteMany({ where: { id: { in: ids } } });
+
+  revalidatePath("/campaigns");
 }

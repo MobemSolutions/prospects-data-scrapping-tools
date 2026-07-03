@@ -39,8 +39,8 @@ export default function RootLayout({
               <Image
                 src="/logo.png"
                 alt="Prospection"
-                width={28}
-                height={28}
+                width={44}
+                height={44}
                 className="rounded"
               />
               Prospection
