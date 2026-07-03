@@ -71,6 +71,7 @@ export async function runCampaign(campaignId: string) {
       data: { status: "DONE" },
     });
   } catch (error) {
+    console.error(`[runCampaign] campagne ${campaignId} en erreur :`, error);
     await prisma.campaign.update({
       where: { id: campaignId },
       data: { status: "ERROR", errorMessage: String(error) },
@@ -132,6 +133,7 @@ async function analyzeLead(
 
     await prisma.lead.update({ where: { id: leadId }, data: { status: "DONE" } });
   } catch (error) {
+    console.error(`[analyzeLead] lead ${leadId} (campagne ${campaignId}) en erreur :`, error);
     await prisma.lead.update({
       where: { id: leadId },
       data: { status: "ERROR", errorMessage: String(error) },

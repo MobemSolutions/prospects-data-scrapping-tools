@@ -63,6 +63,7 @@ export default async function CampaignDetailPage({
           status: campaign.status,
           totalLeads: campaign.totalLeads,
           processedLeads: campaign.processedLeads,
+          errorMessage: campaign.errorMessage,
           leads: campaign.leads,
         }}
       />

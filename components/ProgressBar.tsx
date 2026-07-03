@@ -2,10 +2,12 @@ export function ProgressBar({
   processed,
   total,
   status,
+  errorMessage,
 }: {
   processed: number;
   total: number;
   status: string;
+  errorMessage?: string | null;
 }) {
   const pct = total > 0 ? Math.round((processed / total) * 100) : 0;
 
@@ -27,6 +29,11 @@ export function ProgressBar({
           style={{ width: `${status === "SCRAPING" ? 10 : pct}%` }}
         />
       </div>
+      {status === "ERROR" && errorMessage && (
+        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

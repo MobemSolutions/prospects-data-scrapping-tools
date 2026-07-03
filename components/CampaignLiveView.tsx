@@ -10,6 +10,7 @@ interface CampaignSnapshot {
   status: string;
   totalLeads: number;
   processedLeads: number;
+  errorMessage?: string | null;
   leads: LeadRow[];
 }
 
@@ -79,6 +80,7 @@ export function CampaignLiveView({
         processed={snapshot.processedLeads}
         total={snapshot.totalLeads}
         status={snapshot.status}
+        errorMessage={snapshot.errorMessage}
       />
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm text-neutral-600">
