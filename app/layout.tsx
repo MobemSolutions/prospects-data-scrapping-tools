@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 
@@ -31,7 +32,17 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900">
         <header className="border-b border-neutral-200 bg-white">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <Link href="/campaigns" className="font-semibold tracking-tight">
+            <Link
+              href="/campaigns"
+              className="flex items-center gap-2 font-semibold tracking-tight"
+            >
+              <Image
+                src="/logo.png"
+                alt="Prospection"
+                width={28}
+                height={28}
+                className="rounded"
+              />
               Prospection
             </Link>
             <nav className="flex gap-4 text-sm text-neutral-600">
